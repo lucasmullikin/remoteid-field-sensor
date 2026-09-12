@@ -2,3 +2,8 @@
 *.pyc
 __pycache__/
 .venv/
+records.jsonl
+*.egg-info/
+.pytest_cache/
+build/
+dist/

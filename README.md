@@ -102,6 +102,51 @@ Full rationale for every part, including why each was chosen over its alternativ
 
 ---
 
+## Software
+
+The repository contains the Phase 1 receive, decode and record path.
+
+**What is implemented and tested** (84 tests, no hardware required):
+
+| Component | What it does |
+|---|---|
+| `remoteid_sensor/astm/messages.py` | ASTM F3411 message decoding: Basic ID, Location/Vector, Authentication, Self-ID, System, Operator ID, and message packs |
+| `remoteid_sensor/astm/cta2063a.py` | ANSI/CTA-2063-A serial decoding, including the manufacturer code |
+| `remoteid_sensor/receivers/frames.py` | Unwrapping Remote ID payloads from Bluetooth Service Data and 802.11 vendor IEs |
+| `remoteid_sensor/correlate.py` | Assembling discrete messages into flight sessions and binding identity when it arrives |
+| `remoteid_sensor/store/chain.py` | Tamper-evident hash-chained append-only record store |
+| `remoteid_sensor/store/retention.py` | Retention by cryptographic redaction, preserving the integrity chain |
+| `remoteid_sensor/liveness.py` | Heartbeats that distinguish an empty sky from a deaf receiver |
+| `remoteid_sensor/pipeline.py` | The recording path that ties the above together |
+
+**What is written but UNVERIFIED against hardware:** the radio capture paths in
+`remoteid_sensor/receivers/wifi.py` and `remoteid_sensor/receivers/bluetooth_lr.py`.
+No hardware has been built, so these have never been run. They are structured so that
+the parsing they depend on is tested separately and only genuine radio behaviour
+remains unproven. Each file carries a status banner stating exactly what is unconfirmed.
+
+```bash
+pip install -e ".[dev]"
+python -m pytest                       # 84 tests
+remoteid-sensor selftest --store /tmp/s.jsonl   # exercises the record path, no radio
+remoteid-sensor verify --store /tmp/s.jsonl     # confirms the chain is intact
+```
+
+Three design decisions are worth stating explicitly, because they determine what the
+records can and cannot be used to claim:
+
+- **Both clocks are recorded and never collapsed.** Each record carries the sensor's own
+  receive time and the transmitter's claimed time as separate fields. Disagreement
+  between them is itself a finding.
+- **Silence is never a negative result.** A window may only support a "nothing flew over"
+  statement if it is fully covered by heartbeats proving each receiver was up *and*
+  hearing traffic. Any other window is a non-result.
+- **Nothing received is discarded.** Payloads that fail to decode are recorded with their
+  raw bytes, so a parser later found to be wrong can be re-run against what actually
+  arrived.
+
+---
+
 ## Licence
 
 Code and documentation are released under the licences in `LICENSE`.

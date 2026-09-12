@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "remoteid-field-sensor"
+version = "0.1.0"
+description = "Receive-only sensor that independently records FAA-mandated Remote ID broadcasts"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = []
+
+[project.optional-dependencies]
+# Capture dependencies are optional on purpose: the decode and record path,
+# and its whole test suite, must run on a workstation with no radio attached.
+capture = ["scapy>=2.5", "pyserial>=3.5"]
+dev = ["pytest>=7.4"]
+
+[project.scripts]
+remoteid-sensor = "remoteid_sensor.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["remoteid_sensor*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
