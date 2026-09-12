@@ -1,5 +1,12 @@
 # How to put this repo live, start to finish
 
+> **Status: steps 1 to 4 are complete.** The repository is live at
+> https://github.com/lucasmullikin/remoteid-field-sensor — public, MIT/CC BY 4.0,
+> description and topics set, with continuous integration running the test suite.
+> This file is kept as the record of how it was published, and because **step 5, the
+> Great Scott Gadgets application, is still the live next action.**
+
+
 Ten minutes. Great Scott Gadgets judge on "community impact and clarity of project
 description," so a live repo with real documentation is the thing that makes that
 application work.

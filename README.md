@@ -134,6 +134,61 @@ remoteid-sensor selftest --store /tmp/s.jsonl   # exercises the record path, no 
 remoteid-sensor verify --store /tmp/s.jsonl     # confirms the chain is intact
 ```
 
+### What a record actually looks like
+
+Real output from `remoteid-sensor selftest`, trimmed. Every record is one line of JSON,
+hash-linked to the one before it:
+
+```json
+{
+  "seq": 0,
+  "prev_hash": "0000...0000",
+  "hash": "616e1676708b1134f2ead69600f50a037829ade461437a3e39df2310a5d77404",
+  "retention": "raw",
+  "record": {
+    "type": "detection",
+    "sensor_id": "sensor-01",
+    "sensor_time_unix": 1789249327.239591,
+    "transmitter_time_unix": null,
+    "clock_delta_s": null,
+    "sensor_position": { "latitude": 43.615, "longitude": -116.2023 },
+    "transport": "wifi",
+    "transport_address": "aa:bb:cc:dd:ee:01",
+    "session_id": "aa:bb:cc:dd:ee:01@1789249327.240",
+    "identified_at_receive_time": true,
+    "serial": {
+      "raw": "1596F123456789ABCDEF",
+      "manufacturer_code": "1596",
+      "manufacturer_serial": "123456789ABCDEF",
+      "cta2063a_valid": true,
+      "problems": []
+    },
+    "decoded": { "id_type": 1, "ua_type": 2, "uas_id": "1596F123456789ABCDEF" },
+    "raw_hex": "02123135393646313233343536373839414243444546000000"
+  }
+}
+```
+
+And a heartbeat, which is what separates an empty sky from a deaf receiver:
+
+```json
+{
+  "type": "heartbeat",
+  "sensor_id": "sensor-01",
+  "overall_state": "healthy",
+  "coverage_claim_permitted": true,
+  "receivers": [
+    { "receiver": "wifi", "state": "healthy", "frames_since_last_heartbeat": 1,
+      "seconds_since_last_remoteid": 0.0015 }
+  ]
+}
+```
+
+`coverage_claim_permitted` is the field that matters. It is `true` only when every
+receiver was up *and* hearing traffic. An analysis may state "nothing flew over" for a
+window only if it is continuously covered by records where that flag is true. Every
+other window is a non-result.
+
 Three design decisions are worth stating explicitly, because they determine what the
 records can and cannot be used to claim:
 
