@@ -104,7 +104,9 @@ Full rationale for every part, including why each was chosen over its alternativ
 
 ## Software
 
-The repository contains the Phase 1 receive, decode and record path.
+[![tests](https://github.com/lucasmullikin/remoteid-field-sensor/actions/workflows/tests.yml/badge.svg)](https://github.com/lucasmullikin/remoteid-field-sensor/actions/workflows/tests.yml)
+
+The repository contains the Phase 1 receive, decode and record path. Contributions welcome and no hardware is required to work on it — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 **What is implemented and tested** (84 tests, no hardware required):
 

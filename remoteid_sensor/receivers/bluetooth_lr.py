@@ -1,19 +1,32 @@
 """Bluetooth Remote ID receiver (legacy advertising and BT5 Long Range).
 
-STATUS: UNVERIFIED. Never run against hardware. Requires a SONOFF ZBDongle-P
-(TI CC2652P) reflashed with TI's packet-sniffer firmware. See hardware/BOM.md.
+STATUS: UNVERIFIED, AND THE FIRMWARE TARGET BELOW IS KNOWN TO BE WRONG.
 
-Two things here are genuinely unproven and must be confirmed on hardware
-before any field claim rests on them:
+Requires a SONOFF ZBDongle-P (TI CC2652P). See hardware/BOM.md.
 
-  1. That the CC2652P sniffer firmware captures BT5 Coded PHY (Long Range)
-     advertising, not only 1M PHY legacy advertising. Most Remote ID beacons
-     transmit on both, but the Long Range PHY is where the range is.
-  2. The exact TI sniffer framing. The structure below follows TI's documented
-     packet format; the field offsets are marked TBC until read off a real
-     device, matching the convention in hardware/BOM.md.
+CORRECTION (2026-09-12): this module was written against TI's own packet-sniffer
+firmware and framing. That is the wrong target. NCC Group's Sniffle
+(https://github.com/nccgroup/Sniffle) supports Coded PHY reception on exactly
+this dongle, ships a documented firmware build for it
+(sniffle_cc1352p1_cc2652p1.hex), and exposes a long-range sniffing mode for the
+primary advertising channels. Sniffle's serial protocol is the correct target
+and this module should be rewritten against it.
 
-What is proven: the AD parsing in frames.py, covered by tests.
+That matters because BT5 Coded PHY (Long Range) reception is the single
+assumption the Bluetooth range budget rests on, and OpenDroneID's own receiver
+documentation records that devices commonly advertise Long Range support and
+then never actually receive those signals. Sniffle is the known-good path.
+
+Fallback if Sniffle disappoints on this dongle: an nRF52840 dongle running
+Nordic's nRF Sniffer, which also supports Coded PHY.
+
+Mitigating fact: US transmitters must broadcast BT4 legacy AND BT5
+simultaneously, so a receiver that only captures legacy advertising still sees
+the aircraft - at reduced range, not zero. A Coded PHY failure must therefore
+degrade range, never silently produce empty results.
+
+What is proven: the AD parsing in frames.py, covered by tests. Everything in
+this module is not.
 """
 
 from __future__ import annotations
